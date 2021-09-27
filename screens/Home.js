@@ -24,7 +24,7 @@ const Home = ( {props, navigation} ) => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [farmName, setFarmName] = useState('')
-  const [createdOn, setCreatedOn] = useState('')
+  const [createdOn, setCreatedOn] = useState(new Date())
 
   const db = firebase.firestore()
 
@@ -46,13 +46,13 @@ const Home = ( {props, navigation} ) => {
           setEmail(values.email)
           setFarmName(values.farmName)
           console.log('STATE', name, email, farmName)
-          db.collection('farmers').doc('newFarmer').set({
+          db.collection('farmers').add({
             name: values.name,
             email: values.email,
-            farmName: values.farmName
+            farmName: values.farmName,
+            createdOn: createdOn
           })
           navigation.navigate('FarmerScreen')
-
         }}
         validationSchema={validationSchema}
       >
