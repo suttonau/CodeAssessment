@@ -1,51 +1,63 @@
-import React, { useState } from 'react'
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Button, ScrollView, TextInput } from 'react-native'
 import { Formik } from 'formik'
 import * as yup from 'yup'
 import * as firebase from 'firebase'
-import 'firebase/firestore';
+import 'firebase/firestore'
 
-let validationSchema = yup.object().shape({
+const validationSchema = yup.object().shape({
   name: yup.string().required('Name is required'),
   email: yup.string().required('Email Address is required').email('Please enter a valid email'),
-  farmName: yup.string().min(3, ({min}) => `Farm name must be ${min} characters`),
+  farmName: yup.string().min(3, ({ min }) => `Farm name must be ${min} characters`),
   createdOn: yup.date().default(function () {
-    return new Date();
-  }),
-});
+    return new Date()
+  })
+})
 
-const Home = ( {props, navigation} ) => {
-  const initialState = { 
-    name: '',
-    email: '',
-    farmName: '',
-    createdOn: ''
-  }
+const Home = ({ props, navigation }) => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [farmName, setFarmName] = useState('')
   const [createdOn, setCreatedOn] = useState(new Date())
+  const [farmers, setFarmers] = useState([])
+  const [emails, setEmails] = useState([])
 
   const db = firebase.firestore()
 
-  const handeSubmitForm = (values) => {
-    // handle post submit form with values
-    console.log('SUBMIT', values)
-    
+  useEffect(() => {
+    getFarmers()
+  }, [])
+
+  // attempted to read farmers collection, to check for dupliate emails
+  // seems this is not the best route within FireStore.
+  const getFarmers = async () => {
+    await db.collection('farmers')
+      .get()
+      .then(result => result.docs)
+      .then(docs => docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name,
+        email: doc.data().email,
+        farmName: doc.data().farmName,
+        createdOn: doc.createdOn
+      })))
+      .then(farmers => {
+        setFarmers(farmers)
+      })
   }
 
   return (
     <View style={styles.container}>
       <Text>Enter your Farmer Info!</Text>
       <Formik
-        initialValues={{name: '', email: '', farmName: ''}}
+        initialValues={{ name: '', email: '', farmName: '' }}
         validateOnMount={true}
         onSubmit={(values) => {
-          console.log(values)
           setName(values.name)
           setEmail(values.email)
           setFarmName(values.farmName)
-          console.log('STATE', name, email, farmName)
           db.collection('farmers').add({
             name: values.name,
             email: values.email,
@@ -95,10 +107,10 @@ const Home = ( {props, navigation} ) => {
                 <Text style={styles.errors}>{errors.farmName}</Text>
               )}
             </View>
-            <Button 
+            <Button
               style={[styles.button, { color: isValid ? '#4632A1' : '#CACFD2' }]}
               disabled={!isValid}
-              rounded 
+              rounded
               onPress={handleSubmit} title='Submit' />
             </View>
         )
@@ -114,10 +126,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#fff'
   },
   button: {
-    shadowColor: '#00acee',
+    shadowColor: '#00acee'
   },
   input: {
     borderWidth: 1,
