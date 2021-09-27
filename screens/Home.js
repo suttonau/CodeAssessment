@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet, Button, ScrollView, TextInput } from 'react-native'
 import { Formik } from 'formik'
 import * as yup from 'yup'
+import * as firebase from 'firebase'
+import 'firebase/firestore';
 
 let validationSchema = yup.object().shape({
   name: yup.string().required('Name is required'),
@@ -24,9 +26,12 @@ const Home = ( {props, navigation} ) => {
   const [farmName, setFarmName] = useState('')
   const [createdOn, setCreatedOn] = useState('')
 
+  const db = firebase.firestore()
+
   const handeSubmitForm = (values) => {
     // handle post submit form with values
     console.log('SUBMIT', values)
+    
   }
 
   return (
@@ -36,10 +41,18 @@ const Home = ( {props, navigation} ) => {
         initialValues={{name: '', email: '', farmName: ''}}
         validateOnMount={true}
         onSubmit={(values) => {
+          console.log(values)
           setName(values.name)
           setEmail(values.email)
           setFarmName(values.farmName)
-          console.log(name, email, farmName)
+          console.log('STATE', name, email, farmName)
+          db.collection('farmers').doc('newFarmer').set({
+            name: values.name,
+            email: values.email,
+            farmName: values.farmName
+          })
+          navigation.navigate('FarmerScreen')
+
         }}
         validationSchema={validationSchema}
       >
