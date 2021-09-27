@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Text, StyleSheet, Button, ScrollView, TextInput } from 'react-native'
 import { Formik } from 'formik'
 import * as yup from 'yup'
@@ -13,6 +13,16 @@ let validationSchema = yup.object().shape({
 });
 
 const Home = ( {props, navigation} ) => {
+  const initialState = { 
+    name: '',
+    email: '',
+    farmName: '',
+    createdOn: ''
+  }
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [farmName, setFarmName] = useState('')
+  const [createdOn, setCreatedOn] = useState('')
 
   const handeSubmitForm = (values) => {
     // handle post submit form with values
@@ -25,8 +35,11 @@ const Home = ( {props, navigation} ) => {
       <Formik
         initialValues={{name: '', email: '', farmName: ''}}
         validateOnMount={true}
-        onSubmit={values => {
-          console.log(values)
+        onSubmit={(values) => {
+          setName(values.name)
+          setEmail(values.email)
+          setFarmName(values.farmName)
+          console.log(name, email, farmName)
         }}
         validationSchema={validationSchema}
       >
